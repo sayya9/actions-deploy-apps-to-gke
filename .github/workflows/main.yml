@@ -60,15 +60,12 @@ jobs:
         location: ${{ env.GKE_REGION }}
         project_id: ${{ secrets.PROJECT_ID }}
 
-    - run: |
-        kubectl get svc
-
-    # - name: Helm deploy
-    #   env:
-    #     IMAGE_TAG: latest
-    #     RELEASE: devops-nginx
-    #   run: |
-    #     envsubst < helm/${{ env.REPOSITORY }}/values.yaml | \
-    #     helm upgrade -i --create-namespace -n github-actions -f - \
-    #     ${{ env.RELEASE }} helm/${{ env.REPOSITORY  }}
-    #   shell: bash
+    - name: Helm deploy
+      env:
+        IMAGE_TAG: latest
+        RELEASE: devops-nginx
+      run: |
+        envsubst < helm/${{ env.REPOSITORY }}/values.yaml | \
+        helm upgrade -i --create-namespace -n github-actions -f - \
+        ${{ env.RELEASE }} helm/${{ env.REPOSITORY  }}
+      shell: bash
