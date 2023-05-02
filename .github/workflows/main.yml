@@ -60,6 +60,9 @@ jobs:
         location: ${{ env.GKE_REGION }}
         project_id: ${{ secrets.PROJECT_ID }}
 
+    - run: |
+        kubectl get svc
+
     # - name: Helm deploy
     #   env:
     #     IMAGE_TAG: latest
