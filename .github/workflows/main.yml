@@ -6,11 +6,11 @@ on:
   workflow_dispatch:
 
 env:
-	PROJECT_ID: ${{ secrets.PROJECT_ID }}
-	REGISTRY: asia.gcr.io
-	REPOSITORY: devops-nginx
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  REGISTRY: asia.gcr.io
+  REPOSITORY: devops-nginx
   GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
-	GKE_ZONE: asia-east1-a
+  GKE_ZONE: asia-east1-a
 
 jobs:
   build:
