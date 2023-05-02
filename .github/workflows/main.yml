@@ -5,11 +5,16 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+	PROJECT_ID: ${{ secrets.PROJECT_ID }}
+	REGISTRY: asia.gcr.io
+	REPOSITORY: devops-nginx
+  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
+	GKE_ZONE: asia-east1-a
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      PROJECT_ID: ${{ secrets.PROJECT_ID }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -17,19 +22,17 @@ jobs:
     - id: auth
       uses: 'google-github-actions/auth@v1'
       with:
-        credentials_json: '${{ secrets.GH_ACTIONS_SA_KEY }}'
+        credentials_json: '${{ secrets.GKE_SA_KEY }}'
 
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
 
     - name: Register gcloud as a Docker credential helper
       run: |
-        gcloud auth configure-docker
+        gcloud --quiet auth configure-docker
 
     - name: Build and push Docker image to GCR
       env:
-        REGISTRY: asia.gcr.io
-        REPOSITORY: devops-nginx
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build \
@@ -39,40 +42,26 @@ jobs:
         docker push $REGISTRY/$PROJECT_ID/$REPOSITORY:latest
         docker push $REGISTRY/$PROJECT_ID/$REPOSITORY:$IMAGE_TAG
 
-  # deploy:
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     ECR_REGION: ap-northeast-1
-  #     CLUSTER_REGION: us-east-1
-  #     CLUSTER_NAME: ${{ secrets.CLUSTER_NAME }}
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v3
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-  #   - name: Configure AWS Credentials
-  #     uses: aws-actions/configure-aws-credentials@v2
-  #     with:
-  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       aws-region: ${{ env.ECR_REGION }}
+    - name: Get the GKE credentials
+      uses: google-github-actions/get-gke-credentials@v1
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+        credentials: ${{ secrets.GKE_SA_KEY }}
 
-  #   - name: Login to Amazon ECR to extract the registry URL
-  #     id: login-ecr
-  #     uses: aws-actions/amazon-ecr-login@v1
-
-  #   - name: Create kubeconfig file
-  #     run: |
-  #       aws eks update-kubeconfig --region ${{ env.CLUSTER_REGION }} --name ${{ env.CLUSTER_NAME }}
-
-  #   - name: Helm deploy
-  #     env:
-  #       REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-  #       REPOSITORY: devops-nginx
-  #       IMAGE_TAG: latest
-  #       RELEASE: devops-nginx
-  #     run: |
-  #       envsubst < helm/${{ env.REPOSITORY }}/values.yaml | \
-  #       helm upgrade -i --create-namespace -n github-actions -f - \
-  #       ${{ env.RELEASE }} helm/${{ env.REPOSITORY  }}
-  #     shell: bash
+    - name: Helm deploy
+      env:
+        IMAGE_TAG: latest
+        RELEASE: devops-nginx
+      run: |
+        envsubst < helm/${{ env.REPOSITORY }}/values.yaml | \
+        helm upgrade -i --create-namespace -n github-actions -f - \
+        ${{ env.RELEASE }} helm/${{ env.REPOSITORY  }}
+      shell: bash
