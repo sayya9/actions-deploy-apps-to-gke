@@ -9,7 +9,6 @@ env:
   PROJECT_ID: ${{ secrets.PROJECT_ID }}
   REGISTRY: asia.gcr.io
   REPOSITORY: devops-nginx
-  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
   GKE_ZONE: asia-east1-a
 
 jobs:
@@ -52,7 +51,7 @@ jobs:
     - name: Get the GKE credentials
       uses: google-github-actions/get-gke-credentials@v1
       with:
-        cluster_name: ${{ env.GKE_CLUSTER }}
+        cluster_name: ${{ secrets.GKE_CLUSTER }}
         location: ${{ env.GKE_ZONE }}
         credentials: ${{ secrets.GKE_SA_KEY }}
         project_id: ${{ secrets.PROJECT_ID }}
