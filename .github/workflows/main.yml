@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      ECR_REGION: ap-northeast-1
+      PROJECT_ID: ${{ secrets.PROJECT_ID }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -25,6 +25,19 @@ jobs:
     - name: Register gcloud as a Docker credential helper
       run: |
         gcloud auth configure-docker
+
+    - name: Build and push Docker image to GCR
+      env:
+        REGISTRY: asia.gcr.io
+        REPOSITORY: devops-nginx
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build \
+        -t $REGISTRY/$PROJECT_ID/$REPOSITORY:latest \
+        -t $REGISTRY/$PROJECT_ID/$REPOSITORY:$IMAGE_TAG \
+        .
+        docker push $REGISTRY/$PROJECT_ID/$REPOSITORY:latest
+        docker push $REGISTRY/$PROJECT_ID/$REPOSITORY:$IMAGE_TAG
 
   # deploy:
   #   needs: build
