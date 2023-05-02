@@ -48,6 +48,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - id: auth
+      uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: '${{ secrets.GKE_SA_KEY }}'
+
     - name: Get the GKE credentials
       uses: google-github-actions/get-gke-credentials@v1
       with:
