@@ -84,7 +84,7 @@ helm ls -n github-actions
 ```
 
 ## Issues
-If you ran into `ImagePullBackOff` issue, please check the default service account.
+If you run into `ImagePullBackOff` issue, please check the default service account.
 
 Go to instances groups > VM instances > click to the name of instance that belong to your nodepool > search Service account
 
