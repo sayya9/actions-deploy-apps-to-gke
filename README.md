@@ -42,7 +42,7 @@ mkdir helm
 helm create helm/devops-nginx
 ```
 
-Under the helm chart directory to update template files to be appropriate configurations
+Under the helm chart directory to update template files to be appropriate configurations.
 
 Helm chart structure:
 ```
