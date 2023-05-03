@@ -33,6 +33,7 @@ The key will be downloaded to /tmp, and we need to create a repo secret containi
 
 1. In your repo navigation to Settings > Secrets and variables > Actions
 1. Under “Actions secrets and variables select” `New repository secret`
+![alt text](pictures/actions-deploy-apps-to-gke1.png)
 
 ## Create a helm chart from scratch
 Create a local helm chart directory:
@@ -79,4 +80,15 @@ Execute these commands to check the status of relevant pods:
 ```
 kubectl get po -n github-actions
 helm ls -n github-actions
+```
+
+## Issues
+If you ran into `ImagePullBackOff` issue, please check the default service account.
+
+Go to instances groups > VM instances > click to the name of instance that belong to your nodepool > search Service account
+
+```
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+        --member=serviceAccount:${your_gke_sa_email} \
+        --role=roles/storage.objectViewer
 ```

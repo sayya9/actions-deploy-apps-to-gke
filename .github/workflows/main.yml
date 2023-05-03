@@ -9,6 +9,7 @@ env:
   PROJECT_ID: ${{ secrets.PROJECT_ID }}
   REGISTRY: asia.gcr.io
   REPOSITORY: devops-nginx
+  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
   GKE_REGION: asia-east1
 
 jobs:
@@ -56,9 +57,9 @@ jobs:
     - name: Get the GKE credentials
       uses: google-github-actions/get-gke-credentials@v1
       with:
-        cluster_name: ${{ secrets.GKE_CLUSTER }}
+        cluster_name: ${{ env.GKE_CLUSTER }}
         location: ${{ env.GKE_REGION }}
-        project_id: ${{ secrets.PROJECT_ID }}
+        project_id: ${{ env.PROJECT_ID}}
 
     - name: Helm deploy
       env:
